@@ -7,34 +7,32 @@ require 'mail'
 # Set Database element in variables.
 db_addr = "127.0.0.1"
 db_user = "root"
-db_pass = "bitnami"
-db_table = "bitnami_redmine"
+db_pass = "user"
+db_table = "pass"
 
 
 class MAIL_CTRL
   def send_message(msg)
     mail = Mail.new
     options = {
-      :address                =>  "smtp.office365.com",
+      :address                =>  "example.com",
       :port                   =>  587,
-      :domain                 =>  "smtp.office365.com",
-      :user_name              =>  "ops_sendonly@empathy.co.jp",
-      :password               =>  "swbGAceXAv6c",
+      :domain                 =>  "smtp.example.com",
+      :user_name              =>  "userfrom@example.com",
+      :password               =>  "password",
       :authentication         =>  :login,
       :enable_starttls_auto   =>  true
     }
 
     mail.charset = 'UTF-8'
-    mail.from "ops_sendonly@empathy.co.jp"
+    mail.from "userfrom@example.com"
     mail.delivery_method(:smtp, options)
 
     if(msg.empty?) then
       # エラー時のメール処理を書く
-      puts "Input of the worksheet is missing. Manually, please e-mail transmission."
       exit 1
     else
-      mail.to "ops_all@empathy.co.jp"
-      #mail.cc "ops_all@empathy.co.jp"
+      mail.to "userto@example.com"
       mail.subject "[Warn]Also a new ticket now exists in the Redmine."
       mail.body msg.join
       mail.deliver
@@ -55,7 +53,7 @@ class MAIL_CTRL
   def update_message_insert(result)
     cnt = result.count / 4
     header = "Redmineに'"'新規'"'ステータスのチケットが" << cnt.to_s << "件存在します、担当者は処理を開始してください。\r\n\r\n"
-    footer = "----------------------------------------\r\nhttps://redmineops.empathy.jp/"
+    footer = "----------------------------------------\r\nhttps://redmine.example.com/"
     result.unshift(header)
     result.push(footer)
 
