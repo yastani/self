@@ -1,0 +1,14 @@
+---
+- name: Usergroup Configure | add a group
+  group: 
+    name: "{{ usergroup.user01.group }}" 
+    gid: "{{ usergroup.user01.gid }}"
+
+
+- name: Usergroup Configure | add a user
+  user: 
+    name: "{{ usergroup.user01.user }}" 
+    uid: "{{ usergroup.user01.uid }}" 
+    group: "{{ usergroup.user01.group }}" 
+    update_password: always 
+    password: "{{ usergroup.user01.password }}"

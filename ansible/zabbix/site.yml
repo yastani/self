@@ -1,0 +1,18 @@
+- hosts: all
+  become: no
+  remote_user: root
+  roles:
+    - init
+    - system
+
+- hosts: zabbix-manager
+  become: yes
+  remote_user: "{{ remote_user }}"
+  roles:
+    - zabbix-manager
+
+- hosts: zabbix-agent
+  become: yes
+  remote_user: "{{ remote_user }}"
+  roles:
+    - zabbix-agent

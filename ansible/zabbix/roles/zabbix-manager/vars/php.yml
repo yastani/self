@@ -1,0 +1,57 @@
+---
+php_56_cli_install: []
+
+php_56_cli_update_alternatives: true
+
+php_56_cli_precision: 14
+php_56_cli_serialize_precision: 17
+php_56_cli_disable_functions: []
+php_56_cli_max_execution_time: 0
+php_56_cli_memory_limit: -1
+php_56_cli_error_reporting: 'E_ALL & ~E_DEPRECATED & ~E_STRICT'
+php_56_cli_error_logs: "/var/log/php-error-log"
+
+php_56_cli_mods_present:
+  json: {}
+  xml: {}
+  readline: {}
+  mysql: {}
+  memcache: {}
+  memcached: {}
+  mbstring: {}
+  mcrypt: {}
+  gd: {}
+  curl: {}
+
+php_56_cli_mods_absent:
+opcache: {}
+
+php_56_cli_version: 5.6
+php_56_cli_variable: "php56-php"
+
+php_56_cli_dependencies:
+  - "{{ php_56_cli_variable }}-cli"
+
+php_56_cli_configuration_file: "/etc/php56/php.ini"
+php_56_cli_mods_available_path: "/etc/php56/mods-available"
+php_56_cli_conf_d_file: "/etc/php56/conf.d"
+
+
+# Some of the dependencies below (e.g. `php-memcached`) do not have a version specific version,
+# see: https://github.com/oerdnj/deb.sury.org/issues/363
+
+php_56_cli_mods_dependencies:
+    - "{{ php_56_cli_variable }}-fpm"
+    - "{{ php_56_cli_variable }}-bcmath"
+    - "{{ php_56_cli_variable }}-xml"
+    - "php-mysql"
+    - "php-pecl-memcached"
+    - "php-pecl-memcache"
+    - "{{ php_56_cli_variable }}-mbstring"
+    - "{{ php_56_cli_variable }}-mcrypt"
+    - "{{ php_56_cli_variable }}-gd"
+    - "{{ php_56_cli_variable }}-pecl-redis"
+    - "php-pecl-xdebug"
+    - "{{ php_56_cli_variable }}-intl"
+    - "{{ php_56_cli_variable }}-soap"
+    - "{{ php_56_cli_variable }}-snmp"

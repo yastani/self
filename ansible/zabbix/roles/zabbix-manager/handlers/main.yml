@@ -1,0 +1,41 @@
+---
+- name: restart_apache
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+
+
+- name: restart_mariadb
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+
+
+- name: restart_zabbix_server
+  service:
+    name: zabbix-server
+    state: restarted
+    enabled: yes
+
+
+- name: restart_php_fpm
+  service:
+    name: php-fpm
+    state: restarted
+    enabled: yes
+
+
+- name: restart_grafana
+  service:
+    name: grafana-server
+    state: restarted
+    enabled: yes
+
+
+- name: restart_firewalld
+  service:
+    name: firewalld
+    state: restarted
+    enabled: yes

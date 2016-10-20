@@ -1,0 +1,5 @@
+---
+- name: SELinux Configure | disable to the SELINUX
+  selinux: 
+    state: permissive
+    policy: targeted

@@ -1,0 +1,20 @@
+---
+- name: PHP-FPM Install | install
+  yum:
+    name: php-fpm
+    state: present
+
+- name: PHP-FPM Install | service start
+  service:
+    name: php-fpm
+    state: started
+    enabled: yes
+
+- name: PHP-FPM Install | file convert
+  template:
+    src: php-fpm.conf.j2
+    dest: "/etc/httpd/conf.d/php-fpm.conf"
+    owner: apache
+    group: apache
+    mode: 0644
+  notify: restart_apache

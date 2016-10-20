@@ -1,0 +1,31 @@
+command:
+
+  rake: rake -f /opt/bitnami/apps/redmine/htdocs/Rakefile redmine:email:receive_imap RAILS_ENV="production" unknown_user=ignore default_group="SilentPartner" 
+
+  project:
+    testpj:
+      name: testpj
+      mailserver: gmail
+      username: test.test@gmail.com
+      password: Abcd1234
+
+  mail_default:
+    gmail:
+      host: host=imap.gmail.com
+      ssl: ssl=1
+      port: port=993
+    office365:
+      host: host=imap.office365.com
+      ssl: ssl=1
+      port: port=143
+
+  allow_override:
+    - allow_override=project
+    - tracker
+    - priority
+    - assigned_to
+    - start_date
+    - due_date
+    - 対処内容
+    - 調査手順
+    - 作業確認者名

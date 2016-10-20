@@ -1,0 +1,37 @@
+---
+- name: Apache Configure | include vars
+  include_vars: apache.yml
+
+
+- name: Apache Configure | Configure Apache.
+  lineinfile:
+    dest: "{{ apache_server_root }}/conf/{{ apache_daemon }}.conf"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items: "{{ apache_ports_configuration_items }}"
+
+
+- name: Apache Configure | restart_apache
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+
+
+- name: Apache Configure | Check whether certificates defined in vhosts exist.
+  stat:
+    path: "{{ item.certificate_file }}"
+  register: apache_ssl_certificates
+  with_items: "{{ apache_vhosts_ssl }}"
+
+
+- name: Apache Configure | Add apache vhosts configuration.
+  template:
+    src: "vhosts.conf.j2"
+    dest: "{{ apache_conf_path }}/{{ apache_vhosts_filename }}"
+    owner: apache
+    group: apache
+    mode: 0644
+  notify: restart_apache
+  when: apache_create_vhosts

@@ -1,0 +1,103 @@
+---
+- name: Zabbix Install | include vars
+  include_vars: zabbix.yml
+
+
+- name: Zabbix Install | include vars
+  include_vars: mariadb.yml
+
+
+- name: Zabbix Install | Use Zabbix package name
+  set_fact:
+      zabbix_server_package: "zabbix-server-{{ database_type }}"
+  when: zabbix_repo == "zabbix"
+
+
+- name: Zabbix Install | Use EPEL package name
+  set_fact:
+      zabbix_server_package: "zabbix{{ zabbix_short_version }}-server-{{ database_type }}"
+  when: zabbix_repo == "epel"
+
+
+- name: Zabbix Install | Install basic repo file
+  template:
+    src: zabbix.repo.j2
+    dest: /etc/yum.repos.d/zabbix.repo
+    owner: root
+    group: root
+    mode: 0644
+  when: zabbix_repo == "zabbix"
+
+
+- name: Zabbix Install | Installing zabbix-server-{{ database_type }}
+  yum: 
+    pkg: "{{ zabbix_server_package }}"
+    state: present
+    enablerepo: zabbix
+
+
+- name: Zabbix Install | Install zabbix-web-{{ database_type }}
+  yum: 
+    pkg: "zabbix-web-{{ database_type }}"
+    state: present
+    enablerepo: zabbix
+  when: zabbix_web
+
+
+- name: Zabbix Install | Install apache vhost
+  template:
+    src: vhosts.conf.j2
+    dest: /etc/httpd/conf.d/zabbix.conf
+    owner: apache
+    group: apache
+    mode: 0644
+  notify: restart_apache
+  when: zabbix_vhost and zabbix_web
+
+
+- name: Zabbix Install | Install Ansible module dependencies
+  yum:
+    name: python-psycopg2
+    state: present
+    enablerepo: zabbix
+  when: zabbix_database_creation
+
+
+- name: Zabbix Install | Set short version name
+  set_fact:
+      zabbix_short_version: "{{ zabbix_version | regex_replace('\\.', '') }}"
+
+
+- name: Zabbix Install | Set some facts EPEL
+  set_fact:
+    apache_log: httpd
+    datafiles_path: "/usr/share/zabbix-{{ database_type_long }}"
+  when: zabbix_repo == "epel"
+
+
+- name: Zabbix Install | Set facts for Zabbix 3.0
+  set_fact:
+    apache_log: httpd
+    datafiles_path: "/usr/share/doc/zabbix-server-{{ database_type }}-{{ zabbix_version }}*"
+  when: zabbix_version == 3.0
+
+
+- name: Zabbix Install | Importing schema file
+  shell: "cd {{ datafiles_path }} && if [ -f create.sql.gz ]; then gunzip create.sql.gz ; fi && mysql -h '{{ server_dbhost }}' -u '{{ server_dbuser }}' -p'{{ server_dbpassword }}' -D '{{ server_dbname }}' < create.sql && touch /etc/zabbix/schema.done"
+  args:
+    creates: /etc/zabbix/schema.done
+  when: zabbix_version == 3.0 and zabbix_database_sqlload
+
+
+- name: Zabbix Install | Importing images file
+  shell: "cd {{ datafiles_path }} && if [ -f images.sql.gz ]; then gunzip images.sql.gz ; fi && mysql -h '{{ server_dbhost }}' -u '{{ server_dbuser }}' -p'{{ server_dbpassword }}' -D '{{ server_dbname }}' < images.sql && touch /etc/zabbix/images.done"
+  args:
+    creates: /etc/zabbix/images.done
+  when: zabbix_repo == "epel" and zabbix_database_sqlload
+
+
+- name: Zabbix Install | Importing data file
+  shell: "cd {{ datafiles_path }} && if [ -f data.sql.gz ]; then gunzip data.sql.gz ; fi && mysql -h '{{ server_dbhost }}'  -u '{{ server_dbuser }}' -p'{{ server_dbpassword }}' -D '{{ server_dbname }}' < data.sql && touch /etc/zabbix/data.done"
+  args:
+    creates: /etc/zabbix/data.done
+  when: zabbix_repo == "epel" and zabbix_database_sqlload

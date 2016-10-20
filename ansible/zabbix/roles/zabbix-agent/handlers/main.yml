@@ -1,0 +1,13 @@
+---
+- name: restart_zabbix_agent
+  service:
+    name: "{{ zabbix_agent_service }}"
+    state: restarted
+  become: yes
+
+
+- name: restart_firewalld
+  service:
+    name: firewalld
+    state: restarted
+    enabled: yes

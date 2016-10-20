@@ -1,0 +1,65 @@
+---
+- name: Zabbix Server Configure | include vars
+  include_vars: zabbix.yml
+
+
+- name: Zabbix Server Configure | include vars
+  include_vars: selinux.yml
+
+
+- name: Zabbix Server Configure | Configure zabbix-server
+  template:
+    src: "zabbix_server.conf.j2"
+    dest: "/etc/zabbix/zabbix_server.conf" 
+    owner: zabbix 
+    group: zabbix
+    mode: 0644
+
+
+- name: Zabbix Server Configure | Create include dir zabbix-server
+  file: 
+    path: "{{ server_include }}" 
+    owner: zabbix 
+    group: zabbix 
+    state: directory
+    mode: 0755
+
+
+- name: Zabbix Server Configure | Configure zabbix-web
+  template: 
+    src: "zabbix.conf.php.j2"
+    dest: "/etc/zabbix/web/zabbix.conf.php"
+    owner: zabbix
+    group: zabbix
+    mode: 0644
+  notify: restart_zabbix_server
+
+
+- name: Zabbix Server Configure | Install related SELinux package
+  yum:
+    name: "{{ item }}"
+    state: present
+    enablerepo: zabbix
+  with_items:
+    - libsemanage-python
+  when: zabbix_web or selinux_allow_zabbix_can_network
+
+
+- name: Zabbix Server Configure | Enable httpd_can_connect_zabbix SELinux boolean
+  seboolean:
+    name: "{{ item }}" 
+    state: yes 
+    persistent: yes
+  with_items:
+    - httpd_can_connect_zabbix
+  when: zabbix_web
+
+
+- name: Zabbix Server Configure | Enable zabbix_can_network SELinux boolean
+  seboolean:
+    name: "{{ item }}" 
+    state: yes 
+    persistent: yes
+  with_items:
+    - zabbix_can_network
+  when: selinux_allow_zabbix_can_network

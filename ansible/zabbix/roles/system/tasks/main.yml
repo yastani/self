@@ -1,0 +1,4 @@
+---
+- include: chronyd_install.yml
+- include: firewalld_configure.yml
+- include: usergroup_configure.yml

@@ -1,0 +1,99 @@
+---
+- name: Zabbix Agent Configure | include vars
+  include_vars: zabbix_agent.yml
+
+
+- name: Zabbix Agent Configure | Fail invalid specified agent_listeninterface
+  fail:
+    msg: "The specified network interface does not exist"
+  when: "agent_listeninterface and (agent_listeninterface not in ansible_interfaces)"
+
+
+- name: Zabbix Agent Configure | Get IP of agent_listeninterface when no agent_listenip specified
+  set_fact:
+    agent_listenip: "{{ hostvars[inventory_hostname]['ansible_' + agent_listeninterface]['ipv4'].address | default('0.0.0.0') }}"
+    agent_ip: "{{ hostvars[inventory_hostname]['ansible_' + agent_listeninterface]['ipv4'].address | default('0.0.0.0') }}"
+  when: "agent_listeninterface and not agent_listenip"
+
+
+- name: Zabbix Agent Configure | Default agent_listenip to all when not specified
+  set_fact:
+    agent_listenip: "0.0.0.0"
+    agent_ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4'].address }}"
+  when: "not agent_listenip"
+
+
+- name: Zabbix Agent Configure | Fail invalid specified agent_listenip
+  fail:
+    msg: "The agent_listenip does not exist"
+  when: "agent_listenip != '0.0.0.0' and agent_listenip not in ansible_all_ipv4_addresses"
+
+
+- name: Zabbix Agent Configure | Configure zabbix-agent
+  template:
+    src: zabbix_agentd.conf.j2
+    dest: /etc/zabbix/zabbix_agentd.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_zabbix_agent
+
+
+- name: Zabbix Agent Configure | Create include dir zabbix-agent
+  file:
+    path: "{{ agent_include }}"
+    owner: root
+    group: root
+    state: directory
+
+
+- name: Zabbix Agent Configure | Make sure the zabbix-agent service is running
+  service:
+    name: zabbix-agent
+    state: started
+
+
+- name: Zabbix Agent Configure | Create hostgroups
+  local_action:
+    module: zabbix_group
+    server_url: "{{ zabbix_url }}"
+    login_user: "{{ zabbix_api_user }}"
+    login_password: "{{ zabbix_api_pass }}"
+    host_group: "{{ zabbix_host_groups }}"
+    state: "{{ zabbix_create_hostgroup }}"
+  when: zabbix_api_use
+
+
+- name: Zabbix Agent Configure | Create a new host or update an existing host's info
+  local_action:
+    module: zabbix_host
+    server_url: "{{ zabbix_url }}"
+    login_user: "{{ zabbix_api_user }}"
+    login_password: "{{ zabbix_api_pass }}"
+    host_name: "{{ ansible_fqdn }}"
+    host_groups: "{{ zabbix_host_groups }}"
+    link_templates: "{{ zabbix_link_templates }}"
+    status: "{{ zabbix_host_status }}"
+    state: "{{ zabbix_create_host }}"
+    proxy: "{{ zabbix_proxy }}"
+    interfaces:
+      - type: 1
+        main: 1
+        useip: "{{ zabbix_useuip }}"
+        ip: "{{ agent_ip }}"
+        dns: "{{ ansible_fqdn }}"
+        port: "{{ agent_listenport }}"
+  when: zabbix_api_use
+
+
+- name: Zabbix Agent Configure | Updating host configuration with macros
+  local_action:
+    module: zabbix_hostmacro
+    server_url: "{{ zabbix_url }}"
+    login_user: "{{ zabbix_api_user }}"
+    login_password: "{{ zabbix_api_pass }}"
+    host_name: "{{ ansible_fqdn }}"
+    macro_name: "{{ item.macro_key }}"
+    macro_value: "{{ item.macro_value }}"
+  with_items: zabbix_macros
+  when: zabbix_api_use and zabbix_macros is defined and item.macro_key is defined

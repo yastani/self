@@ -1,0 +1,46 @@
+---
+- name: Zabbix Agent Install | include vars
+  include_vars: zabbix_agent.yml
+
+
+- name: Zabbix Agent Install | Set short version name
+  set_fact:
+    zabbix_short_version: "{{ zabbix_version | regex_replace('\\.', '') }}"
+
+
+- name: Zabbix Agent Install | Use EPEL package name
+  set_fact:
+    zabbix_agent_package: "zabbix{{ zabbix_short_version }}-agent"
+  when: zabbix_repo == "epel"
+
+
+- name: Zabbix Agent Install | Install basic repo file
+  template:
+    src: zabbix.repo.j2
+    dest: /etc/yum.repos.d/zabbix.repo
+    owner: root
+    group: root
+    mode: 0644
+  when: zabbix_repo == "zabbix"
+
+
+- name: Zabbix Agent Install | Installing zabbix-agent
+  yum: 
+    pkg: "{{ zabbix_agent_package }}"
+    state: "{{ zabbix_agent_package_state }}"
+
+
+- name: Zabbix Agent Install | Enable the service
+  service:
+    name: "{{ zabbix_agent_service }}"
+    enabled: yes
+
+
+- name: Zabbix Agent Install | Installing sample file
+  template:
+    src: mysql.conf.j2
+    dest: "{{ agent_include }}/mysql.conf"
+    owner: zabbix
+    group: zabbix
+    mode: 0755
+  notify: restart_zabbix_agent

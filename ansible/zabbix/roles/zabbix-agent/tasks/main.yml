@@ -1,0 +1,4 @@
+---
+- include: zabbix_agent_install.yml
+- include: zabbix_agent_configure.yml
+- include: firewalld_configure.yml

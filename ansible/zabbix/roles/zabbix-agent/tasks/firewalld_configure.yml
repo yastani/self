@@ -1,0 +1,30 @@
+---
+- name: Firewalld Configure | check if firewalld is running
+  shell: systemctl is-active firewalld
+  register: firewalld_result
+  changed_when: False
+  ignore_errors: True
+
+
+- name: Firewalld Configure | updating firewall rules
+  firewalld:
+    source: "{{ item.source }}" 
+    permanent: "{{ item.permanent }}" 
+    state: "{{ item.state }}"
+    zone: "{{ item.zone }}"
+    immediate: yes
+  with_items:
+    - { source: "{{ internal_network }}", permanent: true, state: 'enabled', zone: 'internal' }
+
+
+- name: Firewalld Configure | updating firewall rules
+  firewalld:
+    port: "{{ item.port }}/{{ item.protocol }}" 
+    permanent: "{{ item.permanent }}" 
+    state: "{{ item.state }}"
+    zone: "{{ item.zone }}"
+    immediate: yes
+  with_items:
+    - { port: '161', protocol: 'udp', permanent: true, state: 'enabled', zone: 'internal' }
+    - { port: '10050', protocol: 'tcp', permanent: true, state: 'enabled', zone: 'internal' }
+  notify: restart_firewalld

@@ -1,0 +1,21 @@
+---
+- name: Grafana Install | Ensure Grafana is Installed
+  yum:
+    name: "{{ item }}"
+    state: present
+    enablerepo: epel
+  with_items:
+    - initscripts
+    - fontconfig
+    - https://grafanarel.s3.amazonaws.com/builds/grafana-3.1.0-1468321182.x86_64.rpm
+
+
+- name: Grafana Install | Grafana-Plugin is Installed
+  shell: "sudo grafana-cli plugins install alexanderzobnin-zabbix-app"
+
+
+- name: Grafana Install | Enable the service
+  service:
+    name: grafana-server
+    enabled: yes
+    state: started

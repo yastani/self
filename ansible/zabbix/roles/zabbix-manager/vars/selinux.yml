@@ -1,0 +1,2 @@
+---
+selinux_allow_zabbix_can_network: False

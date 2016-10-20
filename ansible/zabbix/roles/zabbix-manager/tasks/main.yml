@@ -1,0 +1,11 @@
+---
+- include: apache_install.yml
+- include: apache_configure.yml
+- include: mariadb_install.yml
+- include: mariadb_configure.yml
+- include: zabbix_install.yml
+- include: zabbix_configure.yml
+- include: php_configure.yml
+- include: php-fpm_install.yml
+- include: grafana_install.yml
+- include: firewalld_configure.yml

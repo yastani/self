@@ -1,0 +1,13 @@
+---
+- name: PHP Configure | include vars
+  include_vars: php.yml
+
+
+- name: PHP Configure | update php.ini
+  template:
+    src: "php.ini.j2"
+    dest: "/etc/php.ini"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_apache

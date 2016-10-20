@@ -1,0 +1,16 @@
+---
+- name: Yum Repos Install | to be installed remi
+  yum:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+
+
+- name: Yum Repos Install | replace the target files
+  replace:
+    dest: /etc/yum.repos.d/{{ item }}
+    regexp: "enabled *= *1"
+    replace: "enabled=0"
+  with_items:
+    - remi.repo

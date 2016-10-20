@@ -1,0 +1,23 @@
+---
+- name: Reboot | connection test
+  ping:
+
+
+- name: Reboot | reboot to target machine
+  shell: sleep 2 && shutdown -r now "reboot now..."
+  async: 1
+  poll: 0
+  ignore_errors: True
+
+
+- name: Reboot | wait for SSH port up
+  wait_for:
+    host: localhost
+    port: "{{ ssh_port }}"
+    state: started
+    delay: 40
+  delegate_to: 127.0.0.1
+
+
+- name: Reboot | connection test
+  ping:

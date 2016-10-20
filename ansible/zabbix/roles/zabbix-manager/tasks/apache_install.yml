@@ -1,0 +1,28 @@
+---
+- name: Apache Install | include vars
+  include_vars: apache.yml
+
+
+- name: Apache Install | Ensure Apache is installed.
+  yum:
+    name: "{{ item }}"
+    state: installed
+    enablerepo: "{{ apache_enablerepo }}"
+  with_items: "{{ __apache_packages }}"
+
+
+- name: Apache Install | restart_apache
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+
+
+- name: Apache Install | Get Apache version
+  shell: "apachectl -v | grep 'version' | awk -F '/' '{ print $2 }'| awk '{ print $1 }' | cut -c 1-3"
+  register: apachectl_version
+
+
+- name: Apache Install | Set correct apache_version
+  set_fact:
+    apache_version: "{{ apachectl_version.stdout }}"

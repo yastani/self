@@ -1,0 +1,183 @@
+#
+# These groups are read by MariaDB server.
+# Use it for options that only the server (but not clients) should see
+#
+# See the examples of server my.cnf files in /usr/share/mysql/
+#
+ 
+# this is read by the standalone daemon and embedded servers
+[server]
+ 
+# this is only for the mysqld standalone daemon
+[mysqld]
+# IDが他、サーバと重複しないように注意
+#server-id = 1810030
+
+general-log=1
+general-log-file=/var/log/mariadb/mariadb.log
+
+wait_timeout=28800
+skip-name-resolve
+federated = 1
+log-bin-trust-function-creators=1
+ 
+port = 3306
+ 
+sql_mode = 'IGNORE_SPACE,PIPES_AS_CONCAT'
+ 
+character-set-server = utf8
+collation-server = utf8_general_ci
+init-connect = SET NAMES utf8
+lower_case_table_names=1
+ 
+max_connections = 214
+max_connect_errors = 10
+table_open_cache = 400
+max_allowed_packet = 16M
+binlog_cache_size = 128M
+max_heap_table_size = 100M
+read_buffer_size = 128M
+read_rnd_buffer_size = 4M
+sort_buffer_size = 4M
+join_buffer_size = 4M
+thread_cache_size = 200
+max_heap_table_size = 204857600
+query_cache_size = 64M
+thread_stack = 192K
+
+# SERIALIZABLE(直列可能）
+# REPEATABLE-READ (反復可能読み取り)
+# READ-COMMITTED (コミット読み込み)
+# READ-UNCOMMITTED (未コミット読み取り)
+transaction_isolation = READ-COMMITTED
+
+# 構文実行中にサーバによって自動的にディスクに作成された一時テーブルの数です。
+# Created_tmp_disk_tables が大きい場合、原因の一時テーブルをディスクベースの変わりにメモリベースにさせるように、
+# 値 tmp_table_size を増やしたいでしょう。
+# tmp_table_size メモリ内のテンポラリテーブルがこのサイズを超えると、
+# MySQL は自動的にこれをディスク上の MyISAM テーブルに変換する。詳細な GROUP BY クエリを頻繁に行い、
+# メモリに余裕がある場合は、tmp_table_size 値を大きくする。
+tmp_table_size = 100M
+
+# バイナリログのベースファイル名を指定
+log-bin=mysql-bin
+
+# ログのインデックスファイル名を指定
+log-bin-index=mysql-bin
+
+# マスタからのリレーログを指定
+relay-log=relay-bin
+relay-log-index=relay-bin
+
+# バイナリログの有効期間
+expire_logs_days = 7
+
+# binary logging format - mixed recommended
+# バイナリログのフォーマットを指定します。
+# ROW ― は行ベース レプリケーションをデフォルトに設定。
+# STATEMENT ― はステートメント ベース レプリケーションをデフォルトに設定。 MySQL 5.1.11 以前のフォーマット。
+# MIXED ― はミックス ベース レプリケーションをデフォルトに設定。 MySQL 5.1.12 以降のフォーマット。
+binlog_format=mixed
+max-binlog-size = 256M
+
+# スレーブ側のログも吐き出しますよという設定
+# レプリケーションの設定で、従属的な、レプリケーションを構成している場合などに有効な設定
+# dboss_check_point
+log_slave_updates
+
+# ワーニングもエラーログに出力する
+log_warnings
+
+# スロークエリーログを出力する
+# スロークエリーログの単位については、long_query_timeに依存
+slow_query_log
+long_query_time = 0.5
+
+# 索引を利用しないSQLもスローログ出力する（TABLE SCAN）
+log_queries_not_using_indexes = 1
+
+
+# ######################################################################
+# InnoDB(Xtra) 関連
+# ######################################################################
+# InnoDBの内部データなどを保持するための領域です。
+# それほど大量に割り当てる必要はありません。足りなくなったらエラーログにその旨、警告が出ますので、
+# そしたら増やせばいいのではないかと思います。
+innodb_additional_mem_pool_size = 16M
+
+# InnoDB テーブルのデータとインデックスを保存するためのバッファの大きさ。サーバ全体で共有される。
+# InnoDB のみの MySQL 専用サーバなら、RAMの 70-80% 位まで上げてもよいらしい。
+# MyISAM の key_buffer_size よりも、性能にシビアに影響する。
+# innodb_buffer_pool_size = 3192M
+# 物理メモリ(MB) * 0.7 = innodb_buffer_pool_size
+innodb_buffer_pool_size = 256M
+
+# innodbのデータ格納方法を指定する、デフォルトは自動拡張
+# 10M 毎に自動拡張する
+# innodb_data_file_path = ibdata1:10M:autoextend
+# 300GBをあらかじめ割り当てる、自動拡張はしない
+# innodb_data_file_path=ibdata1:300G
+# テーブルスペースを異なるパスに分散する（商用DBでいうところのコンテナの概念に似ているのかな？）
+# innodb_data_file_path=ibdata1:300G;/data2/ibdata2:700G
+innodb_data_file_path = ibdata1:10M:autoextend
+
+# テーブルごとにテーブルスペースを作成する設定
+innodb_file_per_table
+
+# たくさんの遅延があるときの助けとなるパラメータ（SATA writeback キャッシュなしで O_DIRECT を使っているとき、
+# ハードウェア RAID write cache なしでO_DIRECT を使っているとき、ネットワーク接続のストレージを使っているとき）
+innodb_write_io_threads = 8
+innodb_read_io_threads = 8
+
+# InnoDBが内部的に利用するスレッド数を指定する
+innodb_thread_concurrency = 16
+
+# innodb_flush_log_at_trx_commitは、InnoDBのログバッファ
+#（注3）をInnoDBログファイル（注4）に書き込むタイミングと、
+# InnoDBログファイルをディスクにフラッシュするタイミングとを指定するパラメータです。
+# --------------------------------------------------------------------
+# 設定値 ログバッファ→ログファイル ディスクフラッシュ
+# --------------------------------------------------------------------
+# 0 毎秒 毎秒
+# 1 （初期値） COMMIT時 COMMIT時
+# 2 COMMIT時 毎秒
+# --------------------------------------------------------------------
+# たとえ「パフォーマンス向上のために」という理由があっても、安易に1以外にしてはいけません。
+# よほど特別な理由がない>限り1のままにしておくべきです。
+# なぜこれほどまでに1以外をすすめないのでしょうか？ それはInnoDBのデータファイルがディスクにフラッシュされるタイミングを知れば納得していただけると思います。メモリ上にあるInnoDBバッファプールがディスク上のInnoDBデータファイルにフラッシュされます。バッファプールは初期化パラメータinnodb_buffer_pool_sizeで# 大きさを指定するもので、データファイルはinnodb_data_file_pathで指定する最終的にデータが格納されるディスク上のフ>ァイルです。
+innodb_flush_log_at_trx_commit = 1
+
+# InnoDBの更新ログを記録するメモリ上の領域です。
+# たいていは8MB、多くても64MBで十分で、あんまり多くする必要はありません。
+# なぜなら、バッファはトランザクションがCOMMITされるごと、
+# または毎秒ディスクにフラッシュされるので、ほかのパラメータを厚くしたほうが得策です。
+innodb_log_buffer_size = 8M
+
+# データの書き込み、得に大きなサイズのデータの書き込み性能に影響する。
+# ただし、大きなサイズほどデータのリカバリ時間を要する。サイズを変更する場合、正常停止後、# 作成済みのログファイル(デフォルトは /var/lib/mysql/ib_logfileX)を削除し、mysqlサーバを起動しなおす必要がある。
+innodb_log_file_size = 256M
+
+# バッファープール内のダーティページをパージするクリーンナップする割合(%)を指定
+innodb_max_dirty_pages_pct = 90
+
+# InnoDB トランザクションがロール バックされる前に、ロックを待つ秒数でのタイムアウト。
+# InnoDB は自動的にそれ自体のロック テーブル内でトランザクション デッドロックを検出し、
+# トランザクションをロールバックします。InnoDB は LOCK TABLES ステートメントを利用してロック
+# セットを通知します。デフォルトは50秒です。
+innodb_lock_wait_timeout = 120
+
+
+# this is only for embedded server
+[embedded]
+ 
+# This group is only read by MariaDB-5.5 servers.
+# If you use the same .cnf file for MariaDB of different versions,
+# use this group for options that older servers don't understand
+[mysqld-5.5]
+ 
+# These two groups are only read by MariaDB servers, not by MySQL.
+# If you use the same .cnf file for MySQL and MariaDB,
+# you can put MariaDB-only options here
+[mariadb]
+ 
+[mariadb-5.5]

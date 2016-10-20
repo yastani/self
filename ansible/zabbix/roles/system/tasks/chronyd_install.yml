@@ -1,0 +1,26 @@
+---
+- name: Chronyd Install | stop to ntpd
+  package:
+    name: ntpd
+    state: absent
+  register: result_ntpd
+  ignore_errors: True
+
+
+- name: Chronyd Install | install to chronyd
+  yum:
+    name: chrony
+    state: present
+
+
+- name: Chronyd Install | Start on chronyd
+  service:
+    name: chronyd
+    state: started
+
+
+- name: Chronyd Install | replace the target files
+  lineinfile:
+    dest: /etc/chrony.conf
+    line: "server ntp.nict.jp iburst"
+  notify: restart_chronyd

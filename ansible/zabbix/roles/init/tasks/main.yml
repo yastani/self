@@ -1,0 +1,6 @@
+---
+- include: default_timezone_configure.yml
+- include: firewalld_start.yml
+- include: reboot.yml
+- include: selinux_configure.yml
+- include: yum_repos_install.yml

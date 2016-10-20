@@ -1,0 +1,83 @@
+---
+- name: MariaDB Configure | include vars
+  include_vars: mariadb.yml
+
+
+- name: MariaDB Configure | include vars
+  include_vars: zabbix.yml
+
+
+- name: MariaDB Configure | Set the correct delegated_dbhost (to support MySQL db deployment on a remote dbhost)
+  set_fact:
+    delegated_dbhost: "{{ server_dbhost if (server_dbhost != 'localhost') else inventory_hostname }}"
+
+
+- name: MariaDB Configure | create to mysql dir
+  file:
+    path: "/var/lib/mysql"
+    owner: mysql
+    group: mysql
+    mode: 0755
+    state: directory
+
+
+- name: MariaDB Configure | create to PID dir
+  file:
+    path: "/var/run/mysqld"
+    owner: mysql
+    group: mysql
+    mode: 0755
+    state: directory
+
+
+- name: MariaDB Configure | set to mysql.sock
+  file: 
+    path: "/var/lib/mysql/mysql.sock"
+    owner: mysql
+    group: mysql
+    mode: 0666
+    state: touch
+
+
+- name: MariaDB Configure | create to log file
+  file:
+    path: "/var/log/mariadb/mariadb.log"
+    owner: root
+    group: root
+    mode: 0666
+    state: touch
+
+
+- name: MariaDB Configure | set to my.cnf
+  template:
+    src: my.cnf.j2
+    dest: "/etc/my.cnf"
+    owner: mysql
+    group: mysql
+    mode: 0600
+
+
+- name: MariaDB Configure | restart_mariadb
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+
+
+- name: MariaDB Configure | Create database
+  mysql_db:
+    name: "{{ server_dbname }}"
+    state: present
+    config_file: "/etc/my.cnf"
+  when: zabbix_database_creation
+  delegate_to: "{{ delegated_dbhost }}"
+
+
+- name: MariaDB Configure | Create database user
+  mysql_user:
+    name: "{{ server_dbuser }}"
+    password: "{{ server_dbpassword }}"
+    priv: "{{ server_dbname }}.*:ALL"
+    state: present
+  when: zabbix_database_creation
+  delegate_to: "{{ delegated_dbhost }}"

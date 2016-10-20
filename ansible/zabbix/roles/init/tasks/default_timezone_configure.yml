@@ -1,0 +1,10 @@
+---
+- name: Default Timezone Configure | set locale to configfile
+  replace:
+    dest: /etc/locale.conf
+    regexp: "^LANG.*$"
+    replace: LANG="{{ locale.language.jp }}"
+
+
+- name: Default Timezone Configure | set timezone
+  shell: timedatectl set-timezone "{{ locale.timezone.jst }}"

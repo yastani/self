@@ -1,0 +1,14 @@
+---
+- name: MariaDB Install | include vars
+  include_vars: mariadb.yml
+
+
+- name: MariaDB Install | Install Mysql Client package
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - mariadb-server
+    - mariadb
+    - MySQL-python
+  when: database_type == 'mysql'
