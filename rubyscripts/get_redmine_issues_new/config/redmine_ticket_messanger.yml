@@ -1,0 +1,17 @@
+smtp:
+  from: example@example.com
+  to: example@example.com
+  cc:
+  bcc:
+  address: smtp.example.com
+  port: 587
+  domain: smtp.example.com
+  user_name: example@example.com
+  password: password
+  charset: UTF-8
+
+database:
+  address: 127.0.0.1
+  user_name: root
+  password: password
+  table_name: example
