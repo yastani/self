@@ -1,0 +1,96 @@
+---
+- name: create prometheus directory
+  file:
+    path: /etc/prometheus
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: install to snmp
+  yum:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    #- python-urlgrabber
+    #- snmp
+    #- snmp-mibs-downloader
+    #- snmpd
+    - net-snmp
+
+- name: create directory use snmp
+  file:
+    path:  /var/local/snmp/cache
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create /etc/snmp/apache-stats.py
+  copy:
+    src: roles/prometheus_node/files/apache-stats.py
+    dest: /etc/snmp/apache-stats.py
+    mode: 0755
+
+- name: create /etc/snmp/apcstat.php
+  copy:
+    src: roles/prometheus_node/files/apcstat.php
+    dest: /etc/snmp/apcstat.php
+    mode: 0755
+
+- name: create /etc/snmp/snmpd.conf
+  copy:
+    src: roles/prometheus_node/files/snmpd.conf
+    dest: /etc/snmp/snmpd.conf
+    mode: 0644
+
+- name: if exist for snmp_exporter source
+  stat:
+    path: '/usr/local/src/{{ snmp_exporter_name }}'
+  register: is_snmp_exporter
+
+- name: tar -zxvf https://github.com/prometheus/snmp_exporter/releases/download/v0.3.0/snmp_exporter-0.3.0.linux-amd64.tar.gz -C /usr/local/src
+  unarchive:
+    src: '{{ snmp_exporter_url }}'
+    dest: /usr/local/src
+    copy: no
+  when: not is_snmp_exporter.stat.exists
+
+- name: create synbolic link
+  file:
+    src: '/usr/local/src/{{ snmp_exporter_name }}/snmp_exporter'
+    dest: /usr/bin/snmp_exporter
+    state: link
+
+- name: create /etc/prometheus/snmp_exporter.yml
+  template:
+    src: roles/prometheus_node/templates/snmp_exporter.yml
+    dest: /etc/prometheus/snmp_exporter.yml
+    mode: 0644
+
+- name: set init-daemon
+  copy:
+    src: roles/prometheus_node/templates/snmp_exporter.sh
+    dest: /etc/init.d/snmp_exporter
+    mode: 0755
+
+- name: check chkconfig list
+  shell: chkconfig --list | grep snmp_exporter
+  ignore_errors: true
+  register: addedd_to_chkconfig
+
+- name: registering to chkconfig
+  shell: chkconfig --add snmp_exporter
+  when: addedd_to_chkconfig.rc == 1
+
+- name: service starting snmp_exporter...
+  service:
+    name: snmp_exporter
+    state: started
+
+- name: service starting snmpd...
+  service:
+    name: snmpd
+    state: started
+    enabled: yes

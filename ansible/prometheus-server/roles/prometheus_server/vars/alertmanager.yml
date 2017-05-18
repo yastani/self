@@ -1,0 +1,11 @@
+---
+alertmanager_version: '0.5.1'
+alertmanager_name: "alertmanager-{{ alertmanager_version }}.linux-amd64"
+alertmanager_url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz"
+
+smtp_host: 'smtp.gmail.com'
+smtp_port: '587'
+smtp_from: 'yourmail'
+smtp_to: 'yourmail'
+smtp_username: 'yourmail'
+smtp_password: 'yourpassword'

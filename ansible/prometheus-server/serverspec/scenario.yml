@@ -1,0 +1,8 @@
+test:
+  common:
+    - node
+    - server
+  node:
+    - node
+  server:
+    - server

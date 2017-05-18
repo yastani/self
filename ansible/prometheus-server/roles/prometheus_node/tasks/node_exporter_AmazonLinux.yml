@@ -1,0 +1,39 @@
+---
+- name: if exist for node_exporter source
+  stat:
+    path: '/usr/local/src/{{ node_exporter_name }}'
+  register: is_node_exporter
+
+- name: tar -zxvf https://github.com/prometheus/node_exporter/releases/download/v0.14.0/node_exporter-0.14.0.linux-amd64.tar.gz -C /usr/local/
+  unarchive:
+    src: '{{ node_exporter_url }}'
+    dest: /usr/local/src
+    copy: no
+  when: not is_node_exporter.stat.exists
+
+- name: create synbolic link
+  file:
+    src: '/usr/local/src/{{ node_exporter_name }}/node_exporter'
+    dest: /usr/bin/node_exporter
+    state: link
+
+- name: set init-daemon
+  copy:
+    src: roles/prometheus_node/templates/node_exporter.sh
+    dest: /etc/init.d/node_exporter
+    mode: 0755
+
+- name: check chkconfig list
+  shell: chkconfig --list | grep node_exporter
+  ignore_errors: true
+  register: addedd_to_chkconfig
+
+- name: registering to chkconfig
+  become: no
+  shell: chkconfig --add node_exporter
+  when: addedd_to_chkconfig.rc == 1
+
+- name: service starting...
+  service:
+    name: node_exporter
+    state: started

@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create Certificate Manager.
+Parameters:
+  DomainName:
+    Type: String
+    Default: "example.com"
+
+Resources:
+  CertificateManager:
+    Type: "AWS::CertificateManager::Certificate"
+    Properties:
+      DomainName: !Join [ "", [ "*.", !Ref "DomainName" ] ]
+      DomainValidationOptions:
+        - DomainName: !Join [ "", [ "*.", !Ref "DomainName" ] ]
+          ValidationDomain: !Ref "DomainName"
+      #SubjectAlternativeNames:
+      Tags:
+        - Key: "Name"
+          Value: ""
+        - Key: "Project"
+          Value: ""

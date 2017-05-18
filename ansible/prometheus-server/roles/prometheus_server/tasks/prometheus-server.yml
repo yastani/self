@@ -1,0 +1,48 @@
+---
+- name: if exist for prometheus source
+  stat:
+    path: '/usr/local/src/{{ prometheus_name }}'
+  register: is_prometheus
+
+- name: tar -zxvf https://github.com/prometheus/prometheus/releases/download/v1.5.2/prometheus-1.5.2.linux-amd64.tar.gz -C /usr/local/
+  unarchive:
+    src: '{{ prometheus_url }}'
+    dest: /usr/local/src
+    copy: no
+  when: not is_prometheus.stat.exists
+
+- name: create synbolic link
+  file:
+    src: '/usr/local/src/{{ prometheus_name }}/prometheus'
+    dest: /usr/bin/prometheus
+    state: link
+
+- name: create /etc/prometheus/prometheus.yml
+  template:
+    src: roles/prometheus_server/templates/prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+    mode: 0644
+
+- name: create /etc/default/prometheus
+  template:
+    src: roles/prometheus_server/templates/prometheus.env
+    dest: /etc/default/prometheus
+    mode: 0644
+
+- name: create /lib/systemd/system/prometheus.service
+  template:
+    src: roles/prometheus_server/templates/prometheus.service
+    dest: /lib/systemd/system/prometheus.service
+    mode: 0755
+
+- name: service daemon-reload restart.
+  shell: sudo systemctl daemon-reload
+
+- name: service starting...
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - prometheus
+    - alertmanager

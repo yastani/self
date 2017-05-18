@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus alertmanager Service
+After=syslog.target.prometheus.alertmanager.service
+
+[Service]
+EnvironmentFile=-/etc/default/alertmanager
+ExecStart=/usr/bin/alertmanager $OPTIONS
+Restart=always
+ExecReload=/bin/kill -HUP $MAINPID
+User=root
+Group=root
+StandardOutput=syslog
+StandardError=syslog
+Type=simple
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

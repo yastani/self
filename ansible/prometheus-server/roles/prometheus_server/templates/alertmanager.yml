@@ -1,0 +1,124 @@
+global:
+  # The auth token for Hipchat.
+  #chatwork_auth_token: '1e38ade1398a3a10cbef3958424eda03'
+  # Alternative host for Hipchat.
+  #chatwork_room_url: 'https://www.chatwork.com/#!rid67901912'
+
+# The directory from which notification templates are read.
+templates:
+- '/etc/prometheus/alertmanager/template/*.tmpl'
+
+# The root route on which each incoming alert enters.
+route:
+  # The labels by which incoming alerts are grouped together. For example,
+  # multiple alerts coming in for cluster=A and alertname=LatencyHigh would
+  # be batched into a single group.
+  group_by: [
+    'ec2_node',
+    'ec2_snmp'
+  ]
+
+  # When a new group of alerts is created by an incoming alert, wait at
+  # least 'group_wait' to send the initial notification.
+  # This way ensures that you get multiple alerts for the same group that start
+  # firing shortly after another are batched together on the first
+  # notification.
+  group_wait: 30s
+
+  # When the first notification was sent, wait 'group_interval' to send a batch
+  # of new alerts that started firing for that group.
+  group_interval: 5m
+
+  # If an alert has successfully been sent, wait 'repeat_interval' to
+  # resend them.
+  repeat_interval: 1h
+
+  # A default receiver
+  receiver: 'sendmail-test'
+
+  # All the above attributes are inherited by all child routes and can
+  # overwritten on each.
+
+  # The child route trees.
+  #routes:
+  # This routes performs a regular expression match on alert labels to
+  # catch alerts that are related to a list of services.
+  #- match_re:
+  #    service: ^(foo1|foo2|baz)$
+  #  receiver: team-X-mails
+    # The service has a sub-route for critical alerts, any alerts
+    # that do not match, i.e. severity != critical, fall-back to the
+    # parent node and are sent to 'team-X-mails'
+  #  routes:
+  #  - match:
+  #      severity: critical
+  #    receiver: team-X-mails
+  #- match:
+  #    service: files
+  #  receiver: team-X-mails
+
+  # This route handles all alerts coming from a database service. If there's
+  # no team to handle it, it defaults to the DB team.
+  #- match:
+  #    service: database
+  #  receiver: team-X-mails
+    # Also group alerts by affected database.
+  #  group_by: [alertname, cluster, database]
+  #  routes:
+  #  - match:
+  #      owner: team-X
+  #    receiver: team-X-mails
+
+
+# Inhibition rules allow to mute a set of alerts given that another alert is
+# firing.
+# We use this to mute any warning-level notifications if the same alert is
+# already critical.
+#inhibit_rules:
+#- source_match:
+#    severity: 'critical'
+#  target_match:
+#    severity: 'warning'
+  # Apply inhibition if the alertname is the same.
+#  equal: ['alertname', 'cluster', 'service']
+
+
+receivers:
+- name: 'sendmail-test'
+  email_configs:
+  - to: '{{ smtp_to }}'
+    from: '{{ smtp_from }}'
+    # The smarthost and SMTP sender used for mail notifications.
+    smarthost: '{{ smtp_host }}:{{ smtp_port }}'
+    auth_username: '{{ smtp_username }}'
+    auth_identity: '{{ smtp_username }}'
+    auth_password: '{{ smtp_password }}'
+
+- name: 'sendslack-test'
+  slack_configs:
+  - api_url: 'insert_to_api_url'
+    channel: '#general'
+
+# - name: 'team-X-pager'
+#   email_configs:
+#   - to: '{{ smtp_to }}'
+#   pagerduty_configs:
+#   - service_key: <team-X-key>
+
+# - name: 'team-Y-mails'
+#   email_configs:
+#   - to: '{{ smtp_to }}'
+
+# - name: 'team-Y-pager'
+#   pagerduty_configs:
+#   - service_key: <team-Y-key>
+
+# - name: 'team-DB-pager'
+#   pagerduty_configs:
+#   - service_key: <team-DB-key>
+# - name: 'team-X-hipchat'
+#   hipchat_configs:
+#   - auth_token: <auth_token>
+#     room_id: 85
+#     message_format: html
+#     notify: true

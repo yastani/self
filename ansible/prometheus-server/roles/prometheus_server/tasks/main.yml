@@ -1,0 +1,16 @@
+---
+- include_vars: common.yml
+- include_vars: node_exporter.yml
+- include_vars: snmp_exporter.yml
+- include_vars: alertmanager.yml
+- include_vars: prometheus-server.yml
+
+- name: system update
+  apt:
+    update_cache: yes
+
+#- include: common.yml
+- include: node_exporter.yml
+- include: snmp_exporter.yml
+- include: alertmanager.yml
+- include: prometheus-server.yml

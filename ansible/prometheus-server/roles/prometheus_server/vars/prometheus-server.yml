@@ -1,0 +1,4 @@
+---
+prometheus_version: '1.5.2'
+prometheus_name: "prometheus-{{ prometheus_version }}.linux-amd64"
+prometheus_url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"

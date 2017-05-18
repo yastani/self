@@ -1,0 +1,43 @@
+---
+- name: create directory
+  file:
+    path: /etc/prometheus
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+
+- name: if exist for node_exporter source
+  stat:
+    path: '/usr/local/src/{{ node_exporter_name }}'
+  register: is_node_exporter
+
+- name: tar -zxvf https://github.com/prometheus/node_exporter/releases/download/v0.14.0/node_exporter-0.14.0.linux-amd64.tar.gz -C /usr/local/
+  unarchive:
+    src: '{{ node_exporter_url }}'
+    dest: /usr/local/src
+    copy: no
+  when: not is_node_exporter.stat.exists
+
+- name: create synbolic link
+  file:
+    src: '/usr/local/src/{{ node_exporter_name }}/node_exporter'
+    dest: /usr/bin/node_exporter
+    state: link
+
+- name: create /lib/systemd/system/node_exporter.service
+  template:
+    src: roles/prometheus_server/templates/node_exporter.service
+    dest: /lib/systemd/system/node_exporter.service
+    mode: 0755
+
+- name: service daemon-reload restart.
+  shell: sudo systemctl daemon-reload
+
+- name: service starting...
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - node_exporter

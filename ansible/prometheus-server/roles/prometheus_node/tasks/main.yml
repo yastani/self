@@ -1,0 +1,15 @@
+---
+- include_vars: node_exporter.yml
+- include_vars: snmp_exporter.yml
+
+- include: node_exporter_AmazonLinux.yml
+  when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == "NA"
+
+- include: node_exporter_Ubuntu16.yml
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'
+
+- include: snmp_exporter_AmazonLinux.yml
+  when: ansible_distribution == 'Amazon' and ansible_distribution_major_version == "NA"
+
+- include: snmp_exporter_Ubuntu16.yml
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '16.04'

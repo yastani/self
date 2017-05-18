@@ -1,0 +1,5 @@
+node:
+  hosts:
+    node:
+  vars:
+    group_var: "node"

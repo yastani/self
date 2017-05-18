@@ -1,0 +1,56 @@
+---
+- name: if exist for alertmanager source
+  stat:
+    path: '/usr/local/src/{{ alertmanager_name }}'
+  register: is_alertmanager
+
+- name: tar -zxvf https://github.com/prometheus/alertmanager/releases/download/v0.5.1/alertmanager-0.5.1.linux-amd64.tar.gz -C /usr/local/src
+  unarchive:
+    src: '{{ alertmanager_url }}'
+    dest: /usr/local/src
+    copy: no
+  when: not is_alertmanager.stat.exists
+
+- name: create synbolic link
+  file:
+    src: '/usr/local/src/{{ alertmanager_name }}/alertmanager'
+    dest: /usr/bin/alertmanager
+    state: link
+
+- name: create template directory
+  file:
+    path: /etc/prometheus/alertmanager/template/
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+
+- name: create /etc/prometheus/alertmanager/template/default.tmpl
+  copy:
+    src: roles/prometheus_server/templates/default.tmpl
+    dest: /etc/prometheus/alertmanager/template/default.tmpl
+    mode: 0644
+
+- name: create /etc/prometheus/alertmanager.yml
+  template:
+    src: roles/prometheus_server/templates/alertmanager.yml
+    dest: /etc/prometheus/alertmanager.yml
+    mode: 0644
+
+- name: create /etc/prometheus/alert.rules
+  copy:
+    src: roles/prometheus_server/templates/alert.rules
+    dest: /etc/prometheus/alert.rules
+    mode: 0644
+
+- name: create /etc/default/alertmanager
+  template:
+    src: roles/prometheus_server/templates/alertmanager.env
+    dest: /etc/default/alertmanager
+    mode: 0644
+
+- name: create /lib/systemd/system/alertmanager.service
+  template:
+    src: roles/prometheus_server/templates/alertmanager.service
+    dest: /lib/systemd/system/alertmanager.service
+    mode: 0755

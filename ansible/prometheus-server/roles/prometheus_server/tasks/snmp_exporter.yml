@@ -1,0 +1,101 @@
+---
+- name: install to snmp
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - python-urlgrabber
+    - snmp
+    - snmp-mibs-downloader
+    - snmpd
+
+- name: create directory
+  file:
+    path: /etc/prometheus
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create web directory
+  file:
+    path: /var/www/html
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: create directory use Apache2
+  file:
+    path:  /var/local/snmp/cache
+    state: directory
+    owner: snmp
+    group: snmp
+    mode: 0755
+
+- name: create /etc/snmp/apache-stats.py
+  copy:
+    src: roles/prometheus_server/files/apache-stats.py
+    dest: /etc/snmp/apache-stats.py
+    mode: 0755
+
+- name: create /etc/snmp/apcstat.php
+  copy:
+    src: roles/prometheus_server/files/apcstat.php
+    dest: /var/www/html/apcstat.php
+    mode: 0755
+
+- name: create /etc/snmp/snmpd.conf
+  copy:
+    src: roles/prometheus_server/files/snmpd.conf
+    dest: /etc/snmp/snmpd.conf
+    mode: 0644
+
+- name: if exist for snmp_exporter source
+  stat:
+    path: '/usr/local/src/{{ snmp_exporter_name }}'
+  register: is_snmp_exporter
+
+- name: tar -zxvf https://github.com/prometheus/snmp_exporter/releases/download/v0.3.0/snmp_exporter-0.3.0.linux-amd64.tar.gz -C /usr/local/src
+  unarchive:
+    src: '{{ snmp_exporter_url }}'
+    dest: /usr/local/src
+    copy: no
+  when: not is_snmp_exporter.stat.exists
+
+- name: create synbolic link
+  file:
+    src: '/usr/local/src/{{ snmp_exporter_name }}/snmp_exporter'
+    dest: /usr/bin/snmp_exporter
+    state: link
+
+- name: create /etc/prometheus/snmp_exporter.yml
+  template:
+    src: roles/prometheus_server/templates/snmp_exporter.yml
+    dest: /etc/prometheus/snmp_exporter.yml
+    mode: 0644
+
+- name: create /etc/default/snmp_exporter
+  template:
+    src: roles/prometheus_server/templates/snmp_exporter.env
+    dest: /etc/default/snmp_exporter
+    mode: 0644
+
+- name: create /lib/systemd/system/snmp_exporter.service
+  template:
+    src: roles/prometheus_server/templates/snmp_exporter.service
+    dest: /lib/systemd/system/snmp_exporter.service
+    mode: 0755
+
+- name: service daemon-reload restart.
+  shell: sudo systemctl daemon-reload
+
+- name: service starting...
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items:
+    - snmp_exporter
+    - snmpd

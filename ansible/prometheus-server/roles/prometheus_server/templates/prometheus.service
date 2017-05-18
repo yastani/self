@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus Service
+After=syslog.target.prometheus.service
+
+[Service]
+EnvironmentFile=-/etc/default/prometheus
+ExecStart=/usr/bin/prometheus $OPTIONS
+Restart=always
+ExecReload=/bin/kill -HUP $MAINPID
+User=root
+Group=root
+StandardOutput=syslog
+StandardError=syslog
+Type=simple
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

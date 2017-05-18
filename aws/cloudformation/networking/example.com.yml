@@ -1,0 +1,426 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create Network.
+Parameters:
+  SSHFrom:
+    Description: "Limit SSH access to bastion hosts to a CIDR IP block"
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: "your global ip"
+
+  Environment:
+    Type: String
+    Description: "Where is it to deploy?"
+    Default: test
+    AllowedValues:
+      - test
+      - staging
+      - production
+
+Mappings:
+  # Maps CIDR blocks to VPC and various subnets
+  CIDRMap:
+    VPC:
+      CIDR: "192.168.0.0/16"
+    PublicAZ1a:
+      CIDR: "192.168.0.0/19"
+    PublicAZ1c:
+      CIDR: "192.168.32.0/19"
+    PrivateAZ1a:
+      CIDR: "192.168.64.0/19"
+    PrivateAZ1c:
+      CIDR: "192.168.96.0/19"
+
+Resources:
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !FindInMap [CIDRMap, VPC, CIDR]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-VPC"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  PublicAZ1a:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [CIDRMap, PublicAZ1a, CIDR]
+      AvailabilityZone: !Select [ 0, "Fn::GetAZs": !Ref "AWS::Region"]
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-PublicAZ1a"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  PublicAZ1c:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [CIDRMap, PublicAZ1c, CIDR]
+      AvailabilityZone: !Select [ 1, "Fn::GetAZs": !Ref "AWS::Region"]
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-PublicAZ1c"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  PrivateAZ1a:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [CIDRMap, PrivateAZ1a, CIDR]
+      AvailabilityZone: !Select [ 0, "Fn::GetAZs": !Ref "AWS::Region"]
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-PrivateAZ1a"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  PrivateAZ1c:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap [CIDRMap, PrivateAZ1c, CIDR]
+      AvailabilityZone: !Select [ 1, "Fn::GetAZs": !Ref "AWS::Region"]
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-PrivateAZ1c"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-InternetGateway"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  VPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-public-igw"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+
+  PublicRoute:
+    Type: "AWS::EC2::Route"
+    DependsOn: "VPCGatewayAttachment"
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref PublicAZ1a
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref PublicAZ1c
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetNetworkAclAssociation1:
+    Type: "AWS::EC2::SubnetNetworkAclAssociation"
+    Properties:
+      SubnetId: !Ref PublicAZ1a
+      NetworkAclId: !GetAtt VPC.DefaultNetworkAcl
+
+  PublicSubnetNetworkAclAssociation2:
+    Type: "AWS::EC2::SubnetNetworkAclAssociation"
+    Properties:
+      SubnetId: !Ref PublicAZ1c
+      NetworkAclId: !GetAtt VPC.DefaultNetworkAcl
+
+# Configuration to Security Group.
+
+  RedisSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable Redis ingress"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 6379
+        FromPort: 6379
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "udp"
+        ToPort: 6379
+        FromPort: 6379
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-SG-Redis"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  RedisSecurityGroupToAppIngressRedisTcp:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref RedisSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 6379
+      FromPort: 6379
+      #SourceSecurityGroupId: !Ref AppSecurityGroup #Elasticacheから参照してくる
+
+  RedisSecurityGroupToAppIngressRedisUdp:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref RedisSecurityGroup
+      IpProtocol: "udp"
+      ToPort: 6379
+      FromPort: 6379
+      #SourceSecurityGroupId: !Ref AppSecurityGroup #Elasticacheから参照してくる
+
+  MemcachedSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable Memcached ingress"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 11211
+        FromPort: 11211
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-SG-Memcached"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  MemcachedSecurityGroupToAppIngressMemcached:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref MemcachedSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 11211
+      FromPort: 11211
+      #SourceSecurityGroupId: !Ref AppSecurityGroup #Elasticacheから参照してくる
+
+  ELBSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable HTTP ingress"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 80
+        FromPort: 80
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 443
+        FromPort: 443
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-SG-ELB"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  ELBSecurityGroupToAppEgressHttp:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    Properties:
+      GroupId: !Ref ELBSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 80
+      FromPort: 80
+      DestinationSecurityGroupId: !Ref AppSecurityGroup
+
+  ELBSecurityGroupToAppEgressHttps:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    Properties:
+      GroupId: !Ref ELBSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 443
+      FromPort: 443
+      DestinationSecurityGroupId: !Ref AppSecurityGroup
+
+  AppSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable access from ELB to app"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - SourceSecurityGroupId: !Ref ELBSecurityGroup
+        IpProtocol: "tcp"
+        ToPort: 80
+        FromPort: 80
+      - SourceSecurityGroupId: !Ref ELBSecurityGroup
+        IpProtocol: "tcp"
+        ToPort: 443
+        FromPort: 443
+      - SourceSecurityGroupId: !Ref BastionSecurityGroup
+        IpProtocol: "tcp"
+        ToPort: 22
+        FromPort: 22
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-SG-App"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  AppSecurityGroupFromELBIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 80
+      FromPort: 80
+      SourceSecurityGroupId: !Ref ELBSecurityGroup
+
+  AppSecurityGroupFromBastionIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 22
+      FromPort: 22
+      SourceSecurityGroupId: !Ref BastionSecurityGroup
+
+  BastionSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable access to the bastion host"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: !Ref SSHFrom
+        IpProtocol: "tcp"
+        ToPort: 22
+        FromPort: 22
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 80
+        FromPort: 80
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 443
+        FromPort: 443
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-SG-Bastion"
+
+  BastionSecurityGroupToAppEgress:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 22
+      FromPort: 22
+      DestinationSecurityGroupId: !Ref AppSecurityGroup
+
+  BastionSecurityGroupToDbEgress:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    Properties:
+      GroupId: !Ref BastionSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 3306
+      FromPort: 3306
+      DestinationSecurityGroupId: !Ref DbSecurityGroup
+
+  DbSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Enable access to the RDS DB"
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+      - CidrIp: "0.0.0.0/0"
+        IpProtocol: "tcp"
+        ToPort: 3306
+        FromPort: 3306
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-SG-MySQL"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  DbSecurityGroupFromBastionIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref DbSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 3306
+      FromPort: 3306
+      SourceSecurityGroupId: !Ref BastionSecurityGroup
+
+  DbSecurityGroupFromAppIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      GroupId: !Ref DbSecurityGroup
+      IpProtocol: "tcp"
+      ToPort: 3306
+      FromPort: 3306
+      SourceSecurityGroupId: !Ref AppSecurityGroup
+
+  ## NAT-related resources
+  ##
+  ## NAT is used to allow instances in private subnets to communicate with AWS
+  ## services, and pull down code and updates.
+
+  NatGateway:
+    Type: "AWS::EC2::NatGateway"
+    DependsOn: "VPCGatewayAttachment"
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicAZ1a
+
+  NatGateway:
+    Type: "AWS::EC2::NatGateway"
+    DependsOn: "VPCGatewayAttachment"
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicAZ1c
+
+  NatEIP:
+    Type: "AWS::EC2::EIP"
+    DependsOn: "VPCGatewayAttachment"
+    Properties:
+      Domain: "vpc"
+
+  NatRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: "Name"
+        Value: !Sub "${AWS::StackName}-private-nat"
+      - Key: "Environment"
+        Value: !Ref "Environment"
+
+  NatRoute:
+    Type: "AWS::EC2::Route"
+    DependsOn: "VPCGatewayAttachment"
+    Properties:
+      RouteTableId: !Ref NatRouteTable
+     DestinationCidrBlock: "0.0.0.0/0"
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnetRouteTableAssociation1:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref PrivateAZ1a
+      RouteTableId: !Ref NatRouteTable
+
+  PrivateSubnetRouteTableAssociation2:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+     SubnetId: !Ref PrivateAZ1c
+      RouteTableId: !Ref NatRouteTable

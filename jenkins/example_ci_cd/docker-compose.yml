@@ -1,0 +1,52 @@
+version: '2'
+
+services:
+  nginx:
+    container_name: nginx
+    network_mode: "bridge"
+    image: nginx:latest
+    ports:
+      - 8080:80
+    tty: true
+    #networks:
+    #  frontend:
+    #    ipv4_address: 172.16.200.2
+    logging:
+      driver: "json-file"
+    pid: "host"
+  serverspec:
+    container_name: serverspec
+    network_mode: "bridge"
+    build:
+      context: "./serverspec/"
+    links:
+      - nginx:nginx
+    tty: false
+    #networks:
+    #  backend:
+    #    ipv4_address: 172.16.201.2
+    logging:
+      driver: "json-file"
+    pid: "host"
+
+networks:
+  frontend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv4: "true"
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.200.0/24
+        gateway: 172.16.200.1
+  backend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv4: "true"
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.201.0/24
+        gateway: 172.16.201.1

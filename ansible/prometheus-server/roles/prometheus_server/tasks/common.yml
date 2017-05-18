@@ -1,0 +1,20 @@
+---
+- name: install yum packages
+  yum:
+    name: '{{ item }}'
+    state: latest
+    enablerepo: epel
+  with_items:
+    - '{{ yum_pacakage }}'
+
+
+#- name: install pip
+#  shell: curl -kL https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+
+- name: install pip packages
+  pip:
+    name: '{{ item }}'
+    state: latest
+    executable: pip-2.7
+  with_items:
+    - '{{ pip_pacakage }}'
