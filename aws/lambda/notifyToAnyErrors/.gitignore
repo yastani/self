@@ -1,0 +1,8 @@
+.DS_Store
+requests*
+idna*
+certifi*
+chardet*
+PyYAML*
+urllib*
+yaml*

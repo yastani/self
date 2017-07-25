@@ -1,0 +1,39 @@
+params:
+  webhooks:
+    chatwork:
+      api_key: "apikey"
+  environments:
+    test:
+      cookbiz:
+        filter_pattern:
+          match_words:
+            - 'error'
+            - 'critical'
+            - 'warning'
+            - r' 4[0-9][0-9] '
+            - r' 5[0-9][0-9] '
+          exclude_log_streams:
+            - "hoge.log"
+        notify_endpoint: "https://api.chatwork.com/v2/rooms/01234567/messages"
+      aggregation:
+        filter_pattern:
+          match_words:
+            - 'error'
+            - 'critical'
+            - 'warning'
+            - r' 4[0-9][0-9] '
+            - r' 5[0-9][0-9] '
+          exclude_log_streams:
+            - "hoge.log"
+        notify_endpoint: "https://api.chatwork.com/v2/rooms/01234567/messages"
+      mobileapi:
+        filter_pattern:
+          match_words:
+            - 'error'
+            - 'critical'
+            - 'warning'
+            - r' 4[0-9][0-9] '
+            - r' 5[0-9][0-9] '
+          exclude_log_streams:
+            - "hoge.log"
+        notify_endpoint: "https://api.chatwork.com/v2/rooms/01234567/messages"
