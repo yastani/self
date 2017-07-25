@@ -7,6 +7,7 @@ CloudwatchLogsに投げられたログをLambdaへストリーミングし
 S3バケットにある「config.yml」を設定ファイルとして読み込んでいる。
 編集する場合はこれを削除してからULすることで
 それが完了した以降のタイミングから新たな設定をLambdaが読み取り反映されるようになる。
+
 ※つまりLambda側のコードは極力触る必要がない
 
 ## 記述ルール
@@ -53,7 +54,6 @@ S3バケットにある「config.yml」を設定ファイルとして読み込�
 3. 対象のzipファイルをアップロードする
 
 #### 注意点
-1. Lambdaコンテナの標準パッケージに採用されていないpython moduleがいくつかあり
-それらを包含してzip処理を施しているため、Lambda上でコード編集をしないこと
+1. Lambdaコンテナの標準パッケージに採用されていないpython moduleがいくつかあり、それらを包含してzip処理を施しているため、Lambda上でコード編集をしないこと
 1. 新たにpython moduleを追加する場合は下記記事を参考にすること
-    2. http://qiita.com/Hironsan/items/0eb5578f3321c72637b4
+http://qiita.com/Hironsan/items/0eb5578f3321c72637b4
