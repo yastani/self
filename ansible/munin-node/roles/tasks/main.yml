@@ -1,0 +1,62 @@
+---
+- name: Install munin-node
+  yum:
+    name: munin-node
+    state: latest
+
+- name: Start service
+  systemd:
+    name: munin-node
+    state: started
+    enabled: yes
+
+- name: Check if service exists
+  stat: path=/etc/init.d/httpd
+  register: httpdservice_status
+
+- name: Create symbolic-link for httpd
+  file:
+    src: /usr/share/munin/plugins/{{ item }}
+    dest: /etc/munin/plugins/
+    state: link
+  with_items:
+    - apache_accesses
+    - apache_processes
+    - apache_volume
+  when: httpdservice_status.stat.exists
+
+#- name: Replace apache-status
+#  lineinfile: >-
+#    dest='/etc/httpd/conf/httpd.conf'
+#    state=present
+#    backrefs=yes
+#    regexp='^#?\s*ExtendedStatus'
+#    line='ExtendedStatus On'
+#  when: httpdservice_status.stat.exists
+
+- name: Write apache-status
+  blockinfile:
+    dest: /etc/httpd/conf.d/status.conf
+    insertafter: '^$'
+    content:
+      <IfModule mod_status.c>
+        ExtendedStatus On
+        <Location /server-status>
+          SetHandler server-status
+          Order deny,allow
+          Deny from all
+          Allow from 127.0.0.1
+        </Location>
+      </IfModule>
+  when: httpdservice_status.stat.exists
+
+- name: Restart apache-service
+  systemd:
+    name: httpd
+    state: restarted
+  when: httpdservice_status.stat.exists
+
+- name: Start service
+  systemd:
+    name: munin-node
+    state: restarted
