@@ -1,0 +1,81 @@
+---
+- name: Check timezone
+  shell: date | cut -d " " -f 5
+  register: timezone
+
+- name: Debug timezone
+  debug:
+    var: timezone.stdout
+
+- name: Check kernel
+  shell: uname -r
+  register: kernel
+
+- name: Debug kernel
+  debug:
+    var: kernel.stdout
+
+- name: Check selinux
+  shell: getenforce
+  register: selinux
+
+- name: Debug selinux
+  debug:
+    var: selinux.stdout
+
+- name: Check service lists
+  shell: service --status-all | grep running
+  register: service_list
+
+- name: Debug service lists
+  debug:
+    var: service_list.stdout_lines
+
+- name: Check yum update lists
+  yum:
+    list: updates
+  register: result_list
+
+- name: Debug yum update lists
+  debug:
+    var: result_list
+
+#- name: install sysstat
+#  yum:
+#    name: '{{ item }}'
+#    state: latest
+#  with_items:
+#    - 'yum-cron'
+#    - 'yum-plugin-security'
+#    - 'sysstat'
+#    - 'iotop'
+#    - 'dstat'
+
+#- name: is exist for yum-cron.conf
+#  stat:
+#    path: /etc/yum/yum-cron.conf.default
+#  register: yum_cron_default
+
+#- name: synchronize to yum-cron.conf
+#  synchronize:
+#    src: /etc/yum/yum-cron.conf
+#    dest: /etc/yum/yum-cron.conf.default
+#  when: not yum_cron_default.stat.exists
+#  delegate_to: "{{ inventory_hostname }}"
+
+#- name: set to yum-cron.conf
+#  copy:
+#    src: test.yum-cron.conf
+#    dest: /etc/yum/yum-cron.conf
+#    mode: 0644
+#    owner: root
+#    group: root
+#  when: not yum_cron_default.stat.exists
+
+#- name: starting services
+#  service:
+#    name: '{{ item }}'
+#    state: started
+#    enabled: yes
+#  with_items:
+#    - 'yum-cron'

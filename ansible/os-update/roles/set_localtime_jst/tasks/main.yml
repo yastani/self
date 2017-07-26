@@ -1,0 +1,34 @@
+- name: backup for localtime file.
+  synchronize:
+    src: /etc/localtime
+    dest: /etc/localtime.org
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: create symbolic link.
+  file:
+    src: /usr/share/zoneinfo/Asia/Tokyo
+    dest: /etc/localtime
+    state: link
+    force: yes
+
+- name: backup for clock file.
+  synchronize:
+    src: /etc/sysconfig/clock
+    dest: /etc/sysconfig/clock.org
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: modify to timezone.
+  lineinfile: >-
+    dest='/etc/sysconfig/clock'
+    state=present
+    backrefs=yes
+    regexp='^#?\s*ZONE'
+    line='ZONE="Asia/Tokyo"'
+
+- name: modify to timezone.
+  lineinfile: >-
+    dest='/etc/sysconfig/clock'
+    state=present
+    backrefs=yes
+    regexp='^#?\s*UTC'
+    line='UTC=true'

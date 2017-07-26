@@ -1,0 +1,7 @@
+- name: update to packages
+  yum:
+    name: '*'
+    state: latest
+    #exclude:
+    #  - 'kernel*'
+    #  - 'system-release*'

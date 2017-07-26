@@ -1,0 +1,8 @@
+test:
+  common:
+    - host.1a
+    - host.1c
+  host.1a:
+    - host.1a
+  host.1c:
+    - host.1c

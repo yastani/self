@@ -1,0 +1,20 @@
+production:
+  hosts:
+    host.1a:
+    host.1c:
+  vars:
+    group_var: "production"
+
+staging:
+  hosts:
+    host.1a:
+    host.1c:
+  vars:
+    group_var: "staging"
+
+test:
+  hosts:
+    host.1a:
+    host.1c:
+  vars:
+    group_var: "test"

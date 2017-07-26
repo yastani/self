@@ -1,0 +1,373 @@
+require 'spec_helper'
+
+describe 'PHP config parameters' do
+
+  context php_config('engine') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('short_open_tag') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('asp_tags') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('precision') do
+    its(:value) { should eq 14 }
+  end
+
+  context php_config('output_buffering') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('zlib.output_compression') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('implicit_flush') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('serialize_precision') do
+    its(:value) { should eq 17 }
+  end
+
+  context php_config('zend.enable_gc') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('expose_php') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('max_execution_time') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('max_input_time') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('memory_limit') do
+    its(:value) { should eq '512M' }
+  end
+
+  context php_config('error_reporting') do
+    its(:value) { should eq 22527 }
+  end
+
+  context php_config('display_errors') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('display_startup_errors') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('log_errors') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('log_errors_max_len') do
+    its(:value) { should eq 1024 }
+  end
+
+  context php_config('ignore_repeated_errors') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('ignore_repeated_source') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('report_memleaks') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('track_errors') do
+    its(:value) { should eq '' }
+  end
+###
+  context php_config('html_errors') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('variables_order') do
+    its(:value) { should eq 'GPCS' }
+  end
+
+  context php_config('request_order') do
+    its(:value) { should eq 'GP' }
+  end
+
+  context php_config('register_argc_argv') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('auto_globals_jit') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('post_max_size') do
+    its(:value) { should eq '40M' }
+  end
+
+  context php_config('default_mimetype') do
+    its(:value) { should eq 'text/html' }
+  end
+
+  context php_config('default_charset') do
+    its(:value) { should eq 'UTF-8' }
+  end
+
+  context php_config('enable_dl') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('file_uploads') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('upload_max_filesize') do
+    its(:value) { should eq '40M' }
+  end
+
+  context php_config('max_file_uploads') do
+    its(:value) { should eq 20 }
+  end
+
+  context php_config('allow_url_fopen') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('allow_url_include') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('default_socket_timeout') do
+    its(:value) { should eq 60 }
+  end
+
+  context php_config('cli_server.color') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('date.timezone') do
+    its(:value) { should eq 'Asia/Tokyo' }
+  end
+
+  context php_config('pdo_mysql.cache_size') do
+    its(:value) { should eq 2000 }
+  end
+
+  context php_config('sendmail_path') do
+    its(:value) { should eq '/usr/sbin/sendmail -t -i' }
+  end
+
+  context php_config('mail.add_x_header') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('sql.safe_mode') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('odbc.allow_persistent') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('odbc.check_persistent') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('odbc.max_persistent') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('odbc.max_links') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('odbc.defaultlrl') do
+    its(:value) { should eq 4096 }
+  end
+
+  context php_config('odbc.defaultbinmode') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('ibase.allow_persistent') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('ibase.max_persistent') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('ibase.max_links') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('ibase.timestampformat') do
+    its(:value) { should eq '%Y-%m-%d %H:%M:%S' }
+  end
+
+  context php_config('ibase.dateformat') do
+    its(:value) { should eq '%Y-%m-%d' }
+  end
+
+  context php_config('ibase.timeformat') do
+    its(:value) { should eq '%H:%M:%S' }
+  end
+
+  context php_config('mysql.allow_local_infile') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('mysql.allow_persistent') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('mysql.cache_size') do
+    its(:value) { should eq 2000 }
+  end
+
+  context php_config('mysql.max_persistent') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('mysql.max_links') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('mysql.connect_timeout') do
+    its(:value) { should eq 60 }
+  end
+
+  context php_config('mysql.trace_mode') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('mysqli.max_persistent') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('mysqli.allow_persistent') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('mysqli.max_links') do
+    its(:value) { should eq '-1' }
+  end
+
+  context php_config('mysqli.cache_size') do
+    its(:value) { should eq 2000 }
+  end
+
+  context php_config('mysqli.default_port') do
+    its(:value) { should eq 3306 }
+  end
+
+  context php_config('mysqli.reconnect') do
+    its(:value) { should eq '' }
+  end
+
+  context php_config('mysqlnd.collect_statistics') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('bcmath.scale') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('session.save_handler') do
+    its(:value) { should eq 'files' }
+  end
+
+  context php_config('session.use_strict_mode') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('session.use_cookies') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('session.use_only_cookies') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('session.name') do
+    its(:value) { should eq 'PHPSESSID' }
+  end
+
+  context php_config('session.auto_start') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('session.cookie_lifetime') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('session.cookie_path') do
+    its(:value) { should eq '/' }
+  end
+
+  context php_config('session.serialize_handler') do
+    its(:value) { should eq 'php' }
+  end
+
+  context php_config('session.gc_probability') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('session.gc_divisor') do
+    its(:value) { should eq 1000 }
+  end
+
+  context php_config('session.gc_maxlifetime') do
+    its(:value) { should eq 1440 }
+  end
+
+  context php_config('session.cache_limiter') do
+    its(:value) { should eq 'nocache' }
+  end
+
+  context php_config('session.cache_expire') do
+    its(:value) { should eq 180 }
+  end
+
+  context php_config('session.use_trans_sid') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('session.hash_function') do
+    its(:value) { should eq 0 }
+  end
+
+  context php_config('session.hash_bits_per_character') do
+    its(:value) { should eq 5 }
+  end
+
+  context php_config('url_rewriter.tags') do
+    its(:value) { should eq 'a=href,area=href,frame=src,input=src,form=fakeentry' }
+  end
+
+  context php_config('soap.wsdl_cache_enabled') do
+    its(:value) { should eq 1 }
+  end
+
+  context php_config('soap.wsdl_cache_dir') do
+    its(:value) { should eq '/tmp' }
+  end
+
+  context php_config('soap.wsdl_cache_ttl') do
+    its(:value) { should eq 86400 }
+  end
+
+  context php_config('soap.wsdl_cache_limit') do
+    its(:value) { should eq 5 }
+  end
+
+end

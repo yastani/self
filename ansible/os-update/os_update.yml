@@ -1,0 +1,13 @@
+## If want you execute by other on environment.
+# ansible-playbook site.yml -e exec_group_hosts=production
+- name: check_current_status
+  hosts: "{{ exec_group_hosts | default('test') }}"
+  become: yes
+  ## Case to expired end of the cache.
+  # ansible-playbook site.yml -e exec_gather_facts=true
+  ## Case to add of any nodes.
+  # ansible-playbook -l NEWNODEALIAS site.yml -e exec_gather_facts=true
+  gather_facts: "{{ exec_gather_facts | default(true) }}"
+  roles:
+    - set_localtime_jst
+    - update_libraries
