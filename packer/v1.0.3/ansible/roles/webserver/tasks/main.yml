@@ -1,0 +1,14 @@
+---
+- name: install for libraries.
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+      - httpd24
+      - php56
+
+- name: start to the service.
+  service:
+    name: httpd
+    state: started
+    enabled: yes

@@ -1,0 +1,6 @@
+- name: run for webserver.
+  hosts: webserver
+  become: yes
+  gather_facts: "{{ exec_gather_facts | default(true) }}"
+  roles:
+    - webserver
