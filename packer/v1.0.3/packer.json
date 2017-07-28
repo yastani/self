@@ -55,6 +55,16 @@
       "playbook_dir": "./ansible/",
       "playbook_file": "./ansible/{{user `role`}}.yml",
       "inventory_file": "./ansible/inventories/{{user `stage`}}-{{user `role`}}"
+    },
+    {
+      "type": "file",
+      "source": "serverspec",
+      "destination": "/tmp"
+    },
+    {
+      "type": "shell",
+      "execute_command": "{{ .Vars }} sh '{{ .Path }}'",
+      "script": "./scripts/run_serverspec-runner.sh"
     }
   ]
 }
