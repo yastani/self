@@ -1,0 +1,6 @@
+{
+  "env_name":"prod-batch",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[batch],recipe[DATADOG::batch]",
+  "volume_size":"250"
+}

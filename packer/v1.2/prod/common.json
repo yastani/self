@@ -1,0 +1,11 @@
+{
+  "aws_profile":"prod",
+  "source_ami":"ami-ceafcba8",
+  "chef-path":"/opt/",
+  "chef_environment":"prod",
+  "chef_node_json_path":"/opt/nodes/",
+  "authorize_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtn77peFydm7uh3R4UpUUpcSoXr5oq2G/Ma6auLWluOY/y9F2KWl15fpWO4GmHm4FmrZfE7Is8AyoPCMJRX5PFHpyMmJ7fwHNQF78HZf8qFCjCR0aEL/efI10lsPSOpEbdaJPGDg4ES/QKid1lFCB7uPBr1uSnQtP31nx4opFcfkEbDs/xGGirT38o2s6yp1nopYOW8Jbpgvqn1Z7XbsI1blDArwdUubtpvY6pp06rwYK7SZJVZ6fs1wnLB6F10BUXsMq/kxdCE9O1riykXcCcU550L6ylBdZV/GDJIeYayACORA6FPZgEbH/Q6+3hD7gnKaVLGUVnE6Nh9Kk5uQM9 prod-internal",
+  "id_rsa_file_path":"/home/hoge/.ssh/prod-internal",
+  "id_rsa_pub_file_path":"/home/hoge/.ssh/prod-internal.pub",
+  "aws_credentials_file_path":"/home/hoge/.aws/credentials"
+}

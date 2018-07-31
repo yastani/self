@@ -1,0 +1,6 @@
+{
+  "env_name":"provision",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[provision],recipe[DATADOG::provision]",
+  "volume_size":"250"
+}

@@ -1,0 +1,84 @@
+{
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "access_key": "{{user `aws_access_key`}}",
+            "secret_key": "{{user `aws_secret_key`}}",
+            "region": "ap-northeast-1",
+            "source_ami": "{{user `source_ami`}}",
+            "instance_type": "{{user `instance_type`}}",
+            "ssh_username": "ec2-user",
+            "ami_name": "{{user `env_name`}}-{{isotime \"200601020304\"}}",
+            "ami_description": "{{user `env_name`}}-{{isotime \"200601020304\"}}",
+            "launch_block_device_mappings": [
+                {
+                    "device_name": "/dev/xvda",
+                    "volume_size": "{{user `volume_size`}}",
+                    "volume_type": "gp2",
+                    "delete_on_termination": true
+                }
+            ],
+            "profile": "{{user `aws_profile`}}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "{{user `id_rsa_file_path`}}",
+            "destination": "/home/ec2-user/.ssh/id_rsa"
+        },
+        {
+            "type": "file",
+            "source": "{{user `id_rsa_pub_file_path`}}",
+            "destination": "/home/ec2-user/.ssh/id_rsa.pub"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo mkdir /home/ec2-user/.aws",
+                "sudo chown -R ec2-user. /home/ec2-user/.aws"
+            ]
+        },
+        {
+            "type": "file",
+            "source": "{{user `aws_credentials_file_path`}}",
+            "destination": "/home/ec2-user/.aws/credentials"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo {{user `authorize_key`}} >> /home/ec2-user/.ssh/authorized_keys",
+                "chmod 600 /home/ec2-user/.ssh/id_rsa",
+                "chmod 644 /home/ec2-user/.ssh/id_rsa.pub",
+                "chmod 600 /home/ec2-user/.aws/credentials",
+                "chown -R ec2-user. /home/ec2-user",
+                "sudo perl -i -pe 's/HOSTNAME=localhost.localdomain/HOSTNAME={{user `env_name`}}/g' /etc/sysconfig/network"
+            ]
+        },
+        {
+            "type": "chef-solo",
+            "cookbook_paths": [ "{{user `chef-path`}}/site-cookbooks" ],
+            "chef_environment":"{{user `chef_environment`}}",
+            "environments_path":"{{user `chef-path`}}/environments",
+            "roles_path":"{{user `chef-path`}}/roles",
+            "run_list":"role[init]"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "sudo cp -pr /home/ec2-user/.aws /home/hoge/",
+                "sudo cp -pr /home/ec2-user/.ssh /home/hoge/",
+                "sudo chmod 600 /home/hoge/.aws/credentials",
+                "sudo chown -R hoge. /home/hoge"
+            ]
+        },
+        {
+            "type": "chef-solo",
+            "cookbook_paths": [ "{{user `chef-path`}}/site-cookbooks" ],
+            "chef_environment":"{{user `chef_environment`}}",
+            "environments_path":"{{user `chef-path`}}/environments",
+            "roles_path":"{{user `chef-path`}}/roles",
+            "run_list":"{{user `chef_run_list`}}"
+        }
+    ]
+}

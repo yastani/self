@@ -1,0 +1,11 @@
+{
+  "aws_profile":"stage",
+  "source_ami":"ami-ceafcba8",
+  "chef-path":"/opt/",
+  "chef_environment":"stage",
+  "chef_node_json_path":"/opt/nodes/",
+  "authorize_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6AYmRJSJ7o4gIOkpbgNmRNh/bZY0Pmb/YEmVLuvhlq440fMDYV2WavCvpjYX9ugF/xO7FPpk/UU6QOr0ZmlKSBY4tDkVuCWl7Y8jR39APd53W2OZkG7QsCcVyztddMokjJv9lD1xZpiM+qMnsbSa7NwVV6BApUy8so51DF6JzQRdl4dq9w3XgsU8J8tXLyMd2QkqN9w2Fex2lGwP7xVwbxrfZi8wZLTxuBt8z1oCUIM7f5rvtY+Fctie3k4N82RlziDc88H7u0ysLQlNcmQW7ulzCyK0aRuY8yu58N4RIfZPWYzbaqZ6mlBvg62eEzQAt6vRxY1YHnio3VZ3TpjjB stage-internal-key",
+  "id_rsa_file_path":"/home/hoge/.ssh/stage-internal",
+  "id_rsa_pub_file_path":"/home/hoge/.ssh/stage-internal.pub",
+  "aws_credentials_file_path":"/home/hoge/.aws/credentials"
+}

@@ -1,0 +1,6 @@
+{
+  "env_name":"stage-provision",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[provision],recipe[USER::provision_stage]",
+  "volume_size":"200"
+}

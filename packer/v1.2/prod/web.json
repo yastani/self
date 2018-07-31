@@ -1,0 +1,6 @@
+{
+  "env_name":"prod-web",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[web],recipe[DATADOG::web],recipe[TD_AGENT::web]",
+  "volume_size":"250"
+}

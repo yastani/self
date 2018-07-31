@@ -1,0 +1,6 @@
+{
+  "env_name":"prod-admin",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[admin],recipe[DATADOG::admin]",
+  "volume_size":"250"
+}

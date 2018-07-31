@@ -1,0 +1,6 @@
+{
+  "env_name":"stage-batch",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[batch]",
+  "volume_size":"200"
+}

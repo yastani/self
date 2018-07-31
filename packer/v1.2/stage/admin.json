@@ -1,0 +1,6 @@
+{
+  "env_name":"stage-admin",
+  "instance_type":"c4.large",
+  "chef_run_list":"role[admin]",
+  "volume_size":"200"
+}
