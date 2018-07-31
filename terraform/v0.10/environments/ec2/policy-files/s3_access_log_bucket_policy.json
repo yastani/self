@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Id": "AWSConsole-AccessLogs-Policy-${s3_bucket_name}",
+  "Statement": [
+    {
+      "Sid": "AWSConsoleStmt-${s3_bucket_name}",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${lb_account_id}:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": [
+        "arn:aws:s3:::${s3_bucket_name}/web-alb/AWSLogs/${aws_account_id}/*"
+      ]
+    }
+  ]
+}
