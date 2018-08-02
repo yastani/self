@@ -7,7 +7,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias   = "techcross"
+  alias   = "hoge"
   region  = "${lookup(var.region, "default.region")}"
   profile = "${lookup(var.key, "default.credentials_profile")}"
 }

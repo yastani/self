@@ -58,7 +58,7 @@ variable "route53" {
     # public
     #--------------------------------------------------------------
     # example.com
-    techcross.zone_id = "ZXXXX"
+    hoge.zone_id = "ZXXXX"
 
     # example.net
     prod.zone_id = "ZXXXX"

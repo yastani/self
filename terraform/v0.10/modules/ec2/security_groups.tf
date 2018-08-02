@@ -70,7 +70,7 @@ resource "aws_security_group_rule" "provision_sg_in_ssh" {
   security_group_id = "${aws_security_group.provision_sg.id}"
 
   cidr_blocks = [
-    "${var.techcross_ip_addrs}",
+    "${var.hoge_ip_addrs}",
     "${lookup(var.jenkins_ip_addrs, "${terraform.workspace}.jenkins_ip")}",
     "${lookup(var.melmel_ip_addrs, "default.melmel_ip")}",
   ]
