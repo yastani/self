@@ -4,7 +4,7 @@
 
 if [ $# -ne 1 ]; then
   echo 'You must specify one Environment. Exit.'
-  echo "Example: $0 stress1"
+  echo "Example: $0"
   exit 1
 fi
 
